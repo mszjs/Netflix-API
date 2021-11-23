@@ -1,0 +1,226 @@
+swagger: '2.0'
+info:
+  version: "0.0.1"
+  title: Netflix
+host: localhost:10010
+basePath: /
+schemes:
+  - http
+consumes:
+  - application/json
+produces: 
+  - application/json
+tags:
+  - name: "video"
+    description: "Access to videos"
+  - name: "user"
+    description: "Operations about user"
+  - name: "admin"
+    description: "Operations about admin"
+
+paths:
+  /user:
+    x-swagger-router-controller: user
+    post:
+      tags:
+      - user
+      summary: "Create user"
+      description: "Create user"
+      operationId: createUser
+      parameters: 
+        - name: user
+          in: body
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        200:
+          description: "User created"
+        400:
+          description: "Unexpected error"
+  /user/login:
+    x-swagger-router-controller: user
+    post:
+      tags:
+      - user
+      summary: "Logs user into the system"
+      description: "Logs user into the system"
+      operationId: loginUser
+      parameters:
+        - name: "user"
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        200:
+          description: "Login succesfull"
+          schema:
+            $ref: "#/definitions/SessionInfo"
+        400:
+          description: "Unexpected error"
+  /user/logout:
+    x-swagger-router-controller: user
+    get:
+      tags: 
+      - user
+      summary: "Logs out current logged in user session"
+      description: "Logs out current logged in user session"
+      operationId: logoutUser
+      responses:
+        200:
+          description: "Logout succesfull"
+        400:
+          description: "Unexpected error"
+  /videos:
+    x-swagger-router-controller: video
+    get:
+      tags:
+      - video
+      - admin
+      summary: "Get video by title"
+      operationId: getVideoByTitle
+      parameters:
+      - name: videoTitle
+        in: query
+        required: true
+        type: string
+      responses:
+        200:
+          description: "Getting video succesfull"
+          schema: 
+            $ref: "#/definitions/Video"
+        400:
+          description: "Video not found"
+    post:
+      tags:
+      - admin
+      summary: "Add video object"
+      operationId: addVideo
+      parameters:
+        - name: videoContent
+          in: body
+          schema:
+            $ref: "#/definitions/Video"
+      responses:
+        200:
+          description: "Video added to queue" 
+          schema:
+            $ref: "#/definitions/Video"
+        400:
+          description: "Unexpected error"
+  /myvideos:
+    x-swagger-router-controller: video
+    post:
+      tags:
+      - video
+      summary: "Add video to my queue"
+      operationId: addVideoByTitle
+      parameters:
+      - name: videoTitle
+        in: query
+        required: true
+        type: string
+      responses:
+        200:
+          description: "Video added"
+          schema:
+            $ref: "#/definitions/Video"
+        400:
+          description: "Unexpected error"
+    get:
+      tags:
+      - video
+      summary: "List user queue"
+      operationId: listMyQueue
+      responses:
+        200:
+          description: "Listed queue"
+        404 :
+          description: "Unexpected error"
+  /videos/{videoId}:
+    x-swagger-router-controller: admin
+    get:
+      tags:
+      - admin
+      summary: "Get video data by Id"
+      operationId: getVideoById
+      parameters: 
+        - name: videoId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: "Got video by id" 
+          schema:
+            $ref: "#/definitions/Video"
+        404:
+          description: "Video not found"
+    patch:
+      tags:
+      - admin
+      summary: "Update video by Id"
+      operationId: updateVideo
+      parameters:
+        - name: videoId
+          in: path
+          required: true
+          type: string
+        - name: title
+          in: query
+          type: string
+        - name: category
+          in: query
+          type: string
+        - name: type
+          in: query
+          type: string
+          enum:
+          - Movies
+          - TV Shows
+      responses:
+        200:
+          description: "Video updated"
+        404:
+          description: "Video not found"
+    delete:
+      tags:
+      - admin
+      summary: "Delete video by Id"
+      operationId: deleteVideoById
+      parameters:
+        - name: videoId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: "Video deleted"
+        404:
+          description: "Video not found"
+definitions:
+  User:
+    type: object
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+  SessionInfo:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int 64
+  Video:
+    type: object
+    properties: 
+      title:
+        type: string
+      category: 
+        type: string
+      type: 
+        type: string
+        enum:
+          - Movies
+          - TV Shows
